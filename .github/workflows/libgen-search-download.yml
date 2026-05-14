@@ -8,16 +8,20 @@ on:
         required: true
         type: string
       book_index:
-        description: 'شماره کتاب مورد نظر برای دانلود (اختیاری - اگر خالی بگذارید فقط جستجو می‌کند)'
+        description: 'شماره کتاب برای دانلود (اختیاری)'
         required: false
         type: string
         default: ''
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # رفع اخطار Node.js
 
 jobs:
   libgen-job:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # برای commit کردن فایل دانلودی لازم است
+      contents: write   # برای commit فایل دانلودی
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
