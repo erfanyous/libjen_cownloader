@@ -1,0 +1,49 @@
+name: Search and Download from LibGen
+
+on:
+  workflow_dispatch:
+    inputs:
+      search_term:
+        description: 'نام کتاب را وارد کنید'
+        required: true
+        type: string
+      book_index:
+        description: 'شماره کتاب مورد نظر برای دانلود (اختیاری - اگر خالی بگذارید فقط جستجو می‌کند)'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  libgen-job:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # برای commit کردن فایل دانلودی لازم است
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run LibGen client
+        id: libgen
+        env:
+          SEARCH_TERM: ${{ inputs.search_term }}
+          BOOK_INDEX: ${{ inputs.book_index }}
+        run: |
+          python scripts/libgen_client.py
+
+      - name: Commit and push downloaded book
+        if: ${{ inputs.book_index != '' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add downloads/
+          git diff --staged --quiet || git commit -m "Add downloaded book: ${{ inputs.search_term }}"
+          git push
